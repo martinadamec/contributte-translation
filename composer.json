@@ -1,5 +1,5 @@
 {
-  "name": "contributte/translation",
+  "name": "martinadamec/contributte-translation",
   "description": "Symfony/Translation integration for Nette Framework.",
   "type": "library",
   "keywords": [

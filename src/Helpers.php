@@ -44,6 +44,19 @@ class Helpers
 		return Strings::startsWith($message, '//');
 	}
 
+	public static function isAbsolutePrefix(
+		string $message,
+		array $prefixes
+	): bool
+	{
+		foreach ($prefixes as $prefix) {
+			if ( Strings::startsWith($message, $prefix) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * @param mixed $message
 	 * @param array<string>|null $prefix

@@ -27,6 +27,9 @@ class Translator extends SymfonyTranslator implements ITranslator
 
 	public bool $returnOriginalMessage = true;
 
+	/** @var array<string> */
+	public array $absolutePrefixList = [];
+
 	/** @var array<string>|null */
 	private ?array $localesWhitelist = null;
 
@@ -308,6 +311,8 @@ class Translator extends SymfonyTranslator implements ITranslator
 		if (Helpers::isAbsoluteMessage($message)) {
 			$message = Strings::substring($message, 2);
 
+		} elseif (Helpers::isAbsolutePrefix($message, $this->absolutePrefixList)) {
+			// pass
 		} elseif (count($this->prefix) > 0) {
 			$message = $this->getFormattedPrefix() . '.' . $message;
 		}

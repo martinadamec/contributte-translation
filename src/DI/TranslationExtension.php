@@ -51,6 +51,7 @@ class TranslationExtension extends CompilerExtension
 			'debugger' => Expect::bool(interface_exists(IBarPanel::class)),
 			'factory' => Expect::string()->default(null),
 			'logger' => Expect::mixed()->default(null),
+			'absolutePrefixList' => Expect::array()->default([]), // ['ublaboo_datagrid'],
 			'locales' => Expect::structure([
 				'whitelist' => Expect::array()->default(null)->assert(static function (array $array): bool {
 					if (count($array) !== count(array_unique($array))) {
@@ -177,7 +178,8 @@ class TranslationExtension extends CompilerExtension
 			->addSetup('setLocalesWhitelist', [$this->config->locales->whitelist])
 			->addSetup('setConfigCacheFactory', [$configCacheFactory])
 			->addSetup('setFallbackLocales', [$this->config->locales->fallback])
-			->addSetup('$returnOriginalMessage', [$this->config->returnOriginalMessage]);
+			->addSetup('$returnOriginalMessage', [$this->config->returnOriginalMessage])
+			->addSetup('$absolutePrefixList', [$this->config->absolutePrefixList]);
 
 		if ($this->config->autowired === false) {
 			$translator->setAutowired(false);
