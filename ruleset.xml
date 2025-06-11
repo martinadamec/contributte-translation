@@ -3,6 +3,10 @@
 	<rule ref="./vendor/ninjify/coding-standard/contributte.xml">
 		<exclude name="SlevomatCodingStandard.Classes.SuperfluousAbstractClassNaming.SuperfluousSuffix" />
 		<exclude name="SlevomatCodingStandard.Classes.SuperfluousInterfaceNaming.SuperfluousSuffix" />
+		<exclude name="SlevomatCodingStandard.Classes.RequireMultiLineMethodSignature.RequiredMultiLineSignature" />
+		<exclude name="Generic.WhiteSpace.ScopeIndent" /><!-- error: Property "spaceIndent" does not exist on sniff Generic.WhiteSpace.ScopeIndent -->
+		<exclude name="SlevomatCodingStandard.TypeHints.DeclareStrictTypes" /><!-- error: Property "newlinesCountBetweenOpenTagAndDeclare" does not exist on sniff SlevomatCodingStandard.TypeHints.DeclareStrictTypes -->
+		<exclude name="SlevomatCodingStandard.ControlStructures.BlockControlStructureSpacing" /><!-- error: Property "tokensToCheck" does not exist on sniff SlevomatCodingStandard.ControlStructures.BlockControlStructureSpacing -->
 	</rule>
 	<rule ref="SlevomatCodingStandard.Namespaces.FullyQualifiedClassNameInAnnotation">
 		<exclude name="SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly.ReferenceViaFullyQualifiedName" />
@@ -18,6 +22,8 @@
 			<property name="rootNamespaces" type="array">
 				<element key="src" value="Contributte\Translation" />
 				<element key="tests/Tests" value="Tests" />
+				<element key="tests/Fixtures" value="Tests\Fixtures" />
+				<element key="tests/Toolkit" value="Tests\Toolkit" />
 			</property>
 		</properties>
 	</rule>

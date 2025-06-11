@@ -12,6 +12,7 @@ use Nette\DI\Compiler;
 use Nette\DI\CompilerExtension;
 use Nette\DI\ContainerLoader;
 use Nette\DI\MissingServiceException;
+use Nette\InvalidStateException;
 use Nette\Localization\ITranslator;
 use Nette\Utils\Strings;
 use Psr\Log\LoggerInterface;
@@ -21,9 +22,12 @@ use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Tester\Assert;
 use Tests\CustomTranslatorMock;
+use Tests\Fixtures\DummyLoader;
 use Tests\Helpers;
 use Tests\PsrLoggerMock;
 use Tests\TestAbstract;
+use Tests\Toolkit\Container;
+use Tests\Toolkit\Helpers as ToolkitHelpers;
 use UnexpectedValueException;
 
 $container = require __DIR__ . '/../../bootstrap.php';
@@ -76,12 +80,12 @@ final class TranslationExtensionTest extends TestAbstract
 			]);
 		}, InvalidArgument::class, 'Loader must implement interface "' . LoaderInterface::class . '".');
 		Assert::exception(function (): void {
-			Helpers::createContainerFromConfigurator($this->container->getParameters()['tempDir'], [
-				'translation' => [
-					'dirs' => [__DIR__ . '/__no_exists__'],
-				],
-			]);
-		}, UnexpectedValueException::class);
+				Helpers::createContainerFromConfigurator($this->container->getParameters()['tempDir'], [
+					'translation' => [
+						'dirs' => [__DIR__ . '/__no_exists__'],
+					],
+				]);
+		}, $this->isNewNetteUtils ? InvalidStateException::class : UnexpectedValueException::class);
 		Assert::exception(function (): void {
 			Helpers::createContainerFromConfigurator($this->container->getParameters()['tempDir'], [
 				'translation' => [
@@ -117,7 +121,7 @@ final class TranslationExtensionTest extends TestAbstract
 
 	public function test02(): void
 	{
-		try {
+		$e = Assert::exception(function (): void {
 			$loader = new ContainerLoader($this->container->getParameters()['tempDir'], true);
 
 			$loader->load(function (Compiler $compiler): void {
@@ -135,10 +139,8 @@ final class TranslationExtensionTest extends TestAbstract
 				});
 				$compiler->addConfig(['parameters' => $this->container->getParameters(), 'translation' => ['dirs' => [__DIR__ . '__config_dir__']]]);
 			});
-
-		} catch (UnexpectedValueException $e) {
-			Assert::true(Strings::contains($e->getMessage(), __DIR__ . '/__translation_provider_dir__'));// translation provider dirs first !!
-		}
+		}, $this->isNewNetteUtils ? InvalidStateException::class : UnexpectedValueException::class);
+		Assert::true(Strings::contains($e->getMessage(), __DIR__ . '/__translation_provider_dir__'));// translation provider dirs first !!
 	}
 
 	public function test03(): void
@@ -256,6 +258,57 @@ final class TranslationExtensionTest extends TestAbstract
 			},
 			MissingServiceException::class
 		);
+	}
+
+	public function test10(): void
+	{
+		$container = Container::of()
+			->withDefaults()
+			->withCompiler(function (Compiler $compiler): void {
+				$compiler->addConfig(ToolkitHelpers::neon('
+				translation:
+					loaders:
+						dummy: Tests\Fixtures\DummyLoader
+				'));
+			})
+			->build();
+
+		Assert::notNull($container->getByType(DummyLoader::class));
+	}
+
+	public function test11(): void
+	{
+		$container = Container::of()
+			->withDefaults()
+			->withCompiler(function (Compiler $compiler): void {
+				$compiler->addConfig(ToolkitHelpers::neon('
+				services:
+					myservice: Tests\Fixtures\DummyService
+
+				translation:
+					loaders:
+						dummy: Tests\Fixtures\DummyServiceLoader(@myservice)
+				'));
+			})
+			->build();
+
+		Assert::notNull($container->getByType(DummyLoader::class));
+	}
+
+	public function test12(): void
+	{
+		Assert::exception(static function () {
+			Container::of()
+				->withDefaults()
+				->withCompiler(function (Compiler $compiler): void {
+					$compiler->addConfig(ToolkitHelpers::neon('
+				translation:
+					loaders:
+						dummy: Tests\Fixtures\DummyService
+				'));
+				})
+				->build();
+		}, InvalidArgument::class, 'Loader must implement interface "Symfony\Component\Translation\Loader\LoaderInterface".');
 	}
 
 }
